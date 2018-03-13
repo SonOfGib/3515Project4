@@ -2,6 +2,7 @@ package edu.temple.Project4_3515;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.util.TypedValue;
@@ -17,12 +18,12 @@ import android.widget.TextView;
  */
 public class PaletteAdapter extends BaseAdapter{
 
-    public static final String SELECTED_COLOR = "SELECTED_COLOR";
+    static final String SELECTED_COLOR = "SELECTED_COLOR";
 
-    private String[] colors;
+    private int[] colors;
     private Context context;
 
-    PaletteAdapter(@NonNull Context context, @NonNull String[] colors) {
+    PaletteAdapter(@NonNull Context context, @NonNull int[] colors) {
         this.context = context;
         this.colors = colors;
     }
@@ -47,17 +48,24 @@ public class PaletteAdapter extends BaseAdapter{
         if (view == null) {
             view = new TextView(context);
         }
-        final int color = Color.parseColor(colors[i]);
+        final int color = colors[i];
         TextView textView = (TextView) view;
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f);
-        textView.setText(colors[i]);
+        Resources res = context.getResources();
+        String[] labels = res.getStringArray(R.array.grid_array);
+        textView.setText(labels[i]);
         textView.setBackgroundColor(color);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, CanvasActivity.class);
-                intent.putExtra(SELECTED_COLOR, color);
-                context.startActivity(intent);
+                PaletteFragment.OnFragmentInteractionListener mListener;
+                if (context instanceof PaletteFragment.OnFragmentInteractionListener) {
+                    mListener = (PaletteFragment.OnFragmentInteractionListener) context;
+                } else {
+                    throw new RuntimeException(context.toString()
+                            + " must implement OnFragmentInteractionListener");
+                }
+                mListener.onColorSelected(color);
             }
         });
         return textView;
